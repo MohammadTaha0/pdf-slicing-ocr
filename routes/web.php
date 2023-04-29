@@ -17,4 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/k', function () {
     return view('welcome');
 });
-Route::get('/', [HomeController::class,'index']);
+Route::get('/', [HomeController::class,'ocr']);
+Route::post('/', [HomeController::class,'ocr_edit']);
+Route::get('/1', [HomeController::class,'index']);
+Route::get('/2', [HomeController::class,'op']);

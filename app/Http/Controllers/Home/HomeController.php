@@ -10,6 +10,16 @@ use Illuminate\Http\Request;
 use thiagoalessio\TesseractOCR\TesseractOCR;
 use Intervention\Image\ImageManagerStatic as Image;
 use Smalot\PdfParser\Parser;
+// use Intervention\Image\Facades\Image;
+use Google\Cloud\Vision\V1\ImageAnnotatorClient;
+use Google\Cloud\Vision\V1\ImageContext;
+use \Google\Cloud\Vision\V1\Image as NewIMage;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Session;
+use Laravel\OCR\Facades\OCR;
+
+use const \IMG_FILTER_THRESHOLD;
+// use const \IMG_FILTER_THRESHOLD;
 
 class HomeController extends Controller
 {
@@ -56,9 +66,11 @@ class HomeController extends Controller
 
         $i = 1;
         $filter = [];
-        $pdfPath = public_path('/sample.pdf');
+        $pdfPath = public_path('sample.pdf');
         $command = 'pdfinfo ' . $pdfPath;
         exec($command, $output);
+        print_r($output);
+        die();
         $totalPages = str_replace('Pages: ', '', $output[7]);
         $height = 0;
         for ($cols = 1; $cols <= 18; $cols++) {
@@ -226,10 +238,393 @@ class HomeController extends Controller
         //     }
         // }
 
-            echo "<body style='background: white;'><img src='".asset('fname_70_30.png')."' style='mix-blend-mode: multiply;' ></body>";
+        echo "<body style='background: white;'><img src='" . asset('fname_70_30.png') . "' style='mix-blend-mode: multiply;' ></body>";
         echo "<pre>";
         print_r(array_filter($filter));
+        // foreach ($filter as $key => $value) {
+
+        // }
         die();
         return view('Home.Index');
+    }
+    public function ocr()
+    {
+        // Set the path to the image file
+        // $imagePath = public_path('image.jpg');
+
+        // // Set the language for OCR to use
+        // $language = 'eng';
+
+        // // Extract tables from the image
+        // $tables = OCR::table_extraction($imagePath, $language);
+
+        // // Print the extracted tables
+        // print_r($tables);
+        // die();
+        putenv('TESSDATA_PREFIX=' . 'C:\Program Files\Tesseract-OCR\tessdata');
+        $imagePath = 'image.jpg';
+        $rowH = 0;
+        // $imagePath = public_path('images/table.png');
+
+        // $image = Image::make($imagePath);
+
+        // // Convert to grayscale
+        // $image->greyscale();
+
+        // // Apply adaptive threshold
+        // $image->contrast(-2);
+        // $image->brightness(-10);
+        // $image->contrast(-2);
+
+        // // Apply median filter
+        // $image->blur(0);
+
+        // // Save the preprocessed image
+        // $image->save(public_path('preprocessed.jpg'));
+        // $imagePath = 'preprocessed.jpg';
+        // die();
+
+
+        // for ($row = 1; $row <= 16; $row++) {
+        //     // echo $row;
+        //     #cnic
+        //     $width = 276;
+        //     $height = 90;
+        //     $cnic = '';
+        //     $slice = imagecreatetruecolor($width, $height);
+        //     $x = 1000;
+        //     $y = 170 + $rowH;
+        //     $source = imagecreatefromjpeg($imagePath);
+        //     imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
+        //     $slicePath = 'cnic-' . $row . '.jpg';
+        //     imagejpeg($slice, $slicePath);
+        //     try {
+
+        //         $sliceText = (new TesseractOCR($slicePath))
+        //             // ->psm(6) // set page segmentation mode
+        //             ->run();
+        //         $urduText = $sliceText;
+        //         $cnic .= $urduText;
+        //         // unlink($slicePath);
+        //     } catch (\Exception $e) {
+        //         $e->getMessage();
+        //     }
+        //     // print_r($cnic);
+        //     // die();
+        //     if (!File::exists('imgs/' . $cnic)) {
+        //         File::makeDirectory('imgs/' . $cnic);
+        //     }
+        //     #silsila
+        //     $width = 80;
+        //     $height = 90;
+        //     $silsila = '';
+        //     $slice = imagecreatetruecolor($width, $height);
+
+        //     $x = 2100;
+        //     $y = 180 + $rowH;
+        //     $source = imagecreatefromjpeg($imagePath);
+        //     imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
+        //     $slicePath = 'silsila-' . $cnic . '.jpg';
+        //     imagejpeg($slice, $slicePath);
+        //     try {
+        //         $sliceText = (new TesseractOCR($slicePath))
+        //             // ->psm(6) // set page segmentation mode
+        //             ->run();
+        //         $urduText = $sliceText;
+        //         $silsila .= $urduText;
+        //         unlink($slicePath);
+        //     } catch (\Exception $e) {
+        //         $e->getMessage();
+        //     }
+
+        //     #gharana
+        //     $width = 90;
+        //     $height = 90;
+        //     $gharana = '';
+        //     $slice = imagecreatetruecolor($width, $height);
+
+        //     $x = 1960;
+        //     $y = 180 + $rowH;
+        //     $source = imagecreatefromjpeg($imagePath);
+        //     imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
+        //     $gharana = 'imgs/' . $cnic . '/gharana.jpg';
+        //     imagejpeg($slice, $gharana);
+        //     try {
+        //         $sliceText = (new TesseractOCR($gharana))
+        //             // ->psm(6) // set page segmentation mode
+        //             ->run();
+        //         $urduText = $sliceText;
+        //         $gharana .= $urduText;
+        //         unlink($gharana);
+        //     } catch (\Exception $e) {
+        //         $e->getMessage();
+        //     }
+
+        //     #name
+        //     $width = 150;
+        //     $height = 80;
+        //     $name = '';
+        //     $slice = imagecreatetruecolor($width, $height);
+
+        //     $x = 1780;
+        //     $y = 140 + $rowH;
+        //     $source = imagecreatefromjpeg($imagePath);
+        //     imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
+        //     $name = 'imgs/' . $cnic . '/name.jpg';
+        //     imagejpeg($slice, $name);
+
+        //     // address
+        //     $width = 740;
+        //     $height = 90;
+        //     $slice = imagecreatetruecolor($width, $height);
+        //     $x = 160;
+        //     $y = 180 + $rowH;
+        //     $source = imagecreatefromjpeg($imagePath);
+        //     imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
+        //     $address = 'imgs/' . $cnic . '/address.jpg';
+        //     imagejpeg($slice, $address);
+
+
+        //     $data[$cnic] = [
+        //         'cnic' => $cnic,
+        //         'silsila' => $silsila,
+        //         'gharana' => $gharana,
+        //         'name' => $name,
+        //         'address' => $address,
+        //         'nameIsImg' => true,
+        //         'gharanaIsImg' => true,
+        //         'addressIsImg' => true,
+        //     ];
+        //     if ($row < 5) {
+        //         $rowH += 160;
+        //     } elseif ($row === 5) {
+        //         $rowH += 145;
+        //     } elseif ($row > 8) {
+        //         $rowH += 150;
+        //     }
+        // }
+        // session(['data' => $data]);
+        // $data = Session::get('data');
+        // echo '<br><br><br><br><br><pre>';
+        // print_r($data);
+        return view('Home.Index');
+
+        // header('Content-Type: text/html; charset=Windows-1256');
+        // echo '<html><head><style>@font-face {font-family: "Nastaliq";src: url("Nastaliq.ttf") format("truetype");}body {font-family: "Nastaliq"; background-color: black; color: white;}</style></head><body>
+        // <pre>' . print_r($data) . '</pre>
+        // </body></html>';
+    }
+    public function op()
+    {
+
+        // Load OpenCV library
+        // $opencv = new \OpenCV\OpenCV();
+
+        // // Load image
+        // $image = $opencv->imread('image.jpg', \OpenCV\ImreadModes::IMREAD_GRAYSCALE);
+
+        // // Apply Gaussian blur to smooth the image
+        // $blurred = $opencv->GaussianBlur($image, new \OpenCV\Size(5, 5), 0);
+
+        // // Apply Canny edge detection to find edges
+        // $edges = $opencv->Canny($blurred, 50, 150);
+
+        // // Apply Hough line transform to find lines
+        // $lines = $opencv->HoughLines($edges, 1, M_PI / 180, 100);
+
+        // // Draw detected lines on the original image
+        // foreach ($lines as $line) {
+        //     $opencv->line($image, $line->getP1(), $line->getP2(), new \OpenCV\Scalar(255, 0, 0), 3, \OpenCV\LineTypes::LINE_AA, 0);
+        // }
+
+        // // Display result
+        // $opencv->imshow('Table Detection', $image);
+        // $opencv->waitKey();
+    }
+    public function ocr_edit(Request $request)
+    {
+        if ($request->get === 'true') {
+            putenv('TESSDATA_PREFIX=' . 'C:\Program Files\Tesseract-OCR\tessdata');
+            $imagePath = $request->file('image');
+            $rowH = 0;
+            for ($row = 1; $row <= 16; $row++) {
+                #cnic
+                $width = 276;
+                $height = 90;
+                $cnic = '';
+                $slice = imagecreatetruecolor($width, $height);
+                $x = 1000;
+                $y = 170 + $rowH;
+                $source = imagecreatefromjpeg($imagePath);
+                imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
+                $slicePath = 'cnic-' . $row . '.jpg';
+                imagejpeg($slice, $slicePath);
+                try {
+
+                    $sliceText = (new TesseractOCR($slicePath))
+                        // ->psm(6) // set page segmentation mode
+                        ->run();
+                    $urduText = $sliceText;
+                    $cnic .= $urduText;
+                    // unlink($slicePath);
+                } catch (\Exception $e) {
+                    $e->getMessage();
+                }
+                // print_r($cnic);
+                // die();
+                if (!File::exists('imgs/' . $cnic)) {
+                    File::makeDirectory('imgs/' . $cnic);
+                }
+                #silsila
+                $width = 80;
+                $height = 90;
+                $silsila = '';
+                $slice = imagecreatetruecolor($width, $height);
+
+                $x = 2100;
+                $y = 180 + $rowH;
+                $source = imagecreatefromjpeg($imagePath);
+                imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
+                $slicePath = 'silsila-' . $cnic . '.jpg';
+                imagejpeg($slice, $slicePath);
+                try {
+                    $sliceText = (new TesseractOCR($slicePath))
+                        // ->psm(6) // set page segmentation mode
+                        ->run();
+                    $urduText = $sliceText;
+                    $silsila .= $urduText;
+                    unlink($slicePath);
+                } catch (\Exception $e) {
+                    $e->getMessage();
+                }
+
+                #gharana
+                $width = 90;
+                $height = 90;
+                $gharana = '';
+                $slice = imagecreatetruecolor($width, $height);
+
+                $x = 1960;
+                $y = 180 + $rowH;
+                $source = imagecreatefromjpeg($imagePath);
+                imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
+                $gharana = 'imgs/' . $cnic . '/gharana.jpg';
+                imagejpeg($slice, $gharana);
+                try {
+                    $sliceText = (new TesseractOCR($gharana))
+                        // ->psm(6) // set page segmentation mode
+                        ->run();
+                    $urduText = $sliceText;
+                    $gharana .= $urduText;
+                    unlink($gharana);
+                } catch (\Exception $e) {
+                    $e->getMessage();
+                }
+
+                #name
+                $width = 150;
+                $height = 80;
+                $name = '';
+                $slice = imagecreatetruecolor($width, $height);
+
+                $x = 1780;
+                $y = 140 + $rowH;
+                $source = imagecreatefromjpeg($imagePath);
+                imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
+                $name = 'imgs/' . $cnic . '/name.jpg';
+                imagejpeg($slice, $name);
+
+                // address
+                $width = 740;
+                $height = 90;
+                $slice = imagecreatetruecolor($width, $height);
+                $x = 160;
+                $y = 180 + $rowH;
+                $source = imagecreatefromjpeg($imagePath);
+                imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
+                $address = 'imgs/' . $cnic . '/address.jpg';
+                imagejpeg($slice, $address);
+
+
+                $data[$cnic] = [
+                    'cnic' => $cnic,
+                    'silsila' => $silsila,
+                    'gharana' => $gharana,
+                    'name' => $name,
+                    'address' => $address,
+                    'nameIsImg' => true,
+                    'gharanaIsImg' => true,
+                    'addressIsImg' => true,
+                ];
+                if ($row < 5) {
+                    $rowH += 160;
+                } elseif ($row === 5) {
+                    $rowH += 145;
+                } elseif ($row > 8) {
+                    $rowH += 150;
+                }
+            }
+            session(['data' => $data]);
+            $data = Session::get('data');
+        } else {
+            $data = Session::get('data');
+            $data[$request->cnic][$request->type] = $request->inpValue;
+            $data[$request->cnic][$request->type . 'IsImg'] = false;
+            Session::put('data', $data);
+        }
+        foreach ($data as $item) {
+?>
+            <tr>
+                <td>
+                    <?php echo  $item['cnic'] ?>
+                </td>
+
+                <td>
+                    <?php echo  $item['silsila'] ?>
+                </td>
+                <td>
+                    <?php
+                    if ($item['gharanaIsImg']) {
+                    ?>
+                        <img src="<?php echo $item['gharana'] ?>" style="width: 50px" alt="">
+                    <?php
+                    } else {
+                        echo $item['gharana'];
+                    }
+                    ?>
+                    <input type="text" id="gharana-<?php echo $item['cnic'] ?>" class="form-control form-control-sm">
+                    <button type="button" data-role='update' data-type="gharana" class="btn btn-outline-primary" data-id="<?php echo $item['cnic'] ?>">save</button>
+                </td>
+                <td>
+                    <?php
+                    if ($item['nameIsImg']) {
+                    ?>
+                        <img src="<?php echo $item['name'] ?>" style="width: 150px" alt="">
+                    <?php
+                    } else {
+                        echo $item['name'];
+                    }
+                    ?> <input type="text" id="name-<?php echo $item['cnic'] ?>" class="form-control form-control-sm">
+                    <button type="button" data-role='update' data-type="name" class="btn btn-outline-primary" data-id="<?php echo $item['cnic'] ?>">save</button>
+                </td>
+                <td>
+                    <?php
+                    if ($item['addressIsImg']) {
+                    ?>
+                        <img src="<?php echo $item['address'] ?>" style="width: 450px" alt="">
+                    <?php
+                    } else {
+                        echo $item['address'];
+                    }
+                    ?> <div class="input-group form-group">
+                        <input type="text" id="address-<?php echo $item['cnic'] ?>" class="form-control form-control-sm">
+                        <button type="button" data-role='update' data-type="address" class="btn btn-outline-primary" data-id="<?php echo $item['cnic'] ?>">save</button>
+                    </div>
+                </td>
+            </tr>
+<?php
+        }
+        // return response()->json(['status'=>200,'data'=>session('data')]);
+        // return $request->all();
     }
 }
