@@ -16,17 +16,90 @@
 <body>
     <div class="row justify-content-center gy-2 w-100 m-0 p-0">
         <div class="col-10">
+            <form id="pimgForm" class="form" enctype="multipart/form-data">
+                <div class="row row-cols-2 gy-4 justify-content-center align-items-center bg-light py-3">
+                    <div class="col-12">
+                        <h3 class="text-center">Preview</h3>
+                    </div>
+                    <div class="col-7">
+                        {{ csrf_field() }}
+                        <div class="input-group">
+                            <input type="file" class="form-control form-control-sm" name="image" id="pImg"
+                                accept=".jpg">
+                            <input type="hidden" name="view" value="true">
+                            <label for="" class="ps-3 pe-1 my-auto">X-</label>
+                            <input type="number" name="x" id="x" value="1000"
+                                class="form-control form-control-sm" placeholder="Enter X-axis Value">
+                            <label for="" class="ps-3 pe-1 my-auto">Y-</label>
+                            <input type="number" name="y" id="y" value="170"
+                                class="form-control form-control-sm" placeholder="Enter Y-axis Value">
+                            <label for="" class="ps-3 pe-1 my-auto">Height-</label>
+                            <input type="number" name="height" id="height" value="160"
+                                class="form-control form-control-sm" placeholder="Enter Y-axis Value">
+                            <label for="" class="ps-3 pe-1 my-auto">Upto-</label>
+                            <input type="number" name="upto" id="upto" value="16"
+                                class="form-control form-control-sm" placeholder="Enter upto Value">
+                        </div>
+
+                        <div class="col-12 p-0 m-0" id="preImgs">
+                            <img src="" alt="" class="w-100 d-block">
+                        </div>
+                    </div>
+                </div>
+            </form>
+
             <form id="imageForm" class="form" enctype="multipart/form-data">
                 <div class="row row-cols-2 gy-4 justify-content-center align-items-center bg-light py-3">
                     <div class="col-12">
                         <h3 class="text-center">Upload Image File</h3>
                     </div>
-                    <div class="col">
+                    <div class="col-7">
                         {{ csrf_field() }}
                         <div class="input-group">
-                            <input type="file" class="form-control" name="image" accept=".jpg">
                             <input type="hidden" name="get" value="true">
-                            <button type="submit" id="uploadBtn" class="btn btn-outline-primary">Upload</button>
+                            <label for="" class="ps-3 pe-1 my-auto">X-</label>
+                            <input type="number" name="x" id="x" value="1000"
+                                class="form-control form-control-sm" placeholder="Enter X-axis Value">
+                            <label for="" class="ps-3 pe-1 my-auto">Y-</label>
+                            <input type="number" name="y" id="y" value="170"
+                                class="form-control form-control-sm" placeholder="Enter Y-axis Value">
+                            <label for="" class="ps-3 pe-1 my-auto">Height-</label>
+                            <input type="number" name="height" id="height" value="160"
+                                class="form-control form-control-sm" placeholder="Enter Y-axis Value">
+                            <label for="" class="ps-3 pe-1 my-auto">Upto-</label>
+                            <input type="number" name="upto" id="upto" value="16"
+                                class="form-control form-control-sm" placeholder="Enter upto Value">
+                        </div>
+                        <div class="input-group">
+                            <input type="file" class="form-control form-control-sm" name="image"
+                                accept=".jpg">
+                            <input type="hidden" name="get" value="true">
+                            <button type="submit" id="uploadBtn"
+                                class="btn btn-sm btn-outline-primary">Upload</button>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+
+            <form id="insertForm" class="form" enctype="multipart/form-data">
+                <div class="row row-cols-2 gy-4 justify-content-center align-items-center bg-light py-3">
+                    <div class="col-12">
+                        <h3 class="text-center">Insert Records</h3>
+                    </div>
+                    <div class="col-7">
+                        <div class="input-group">
+                            <select name="uc" id="uc" class="form-select form-select-sm">
+                                <option value="">Select UC</option>
+                                @foreach ($ucs as $uc)
+                                    <option value="{{ $uc->id }}">{{ $uc->districtName . ' ' . $uc->UCName }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <input type="text" name="blockcode" class="form-control form-control-sm"
+                                placeholder="Type BlockCode..." value="">
+                            <button type="submit" id="insertBtn"
+                                class="btn btn-sm btn-outline-primary">Insert</button>
                         </div>
                     </div>
                 </div>
@@ -35,7 +108,7 @@
         <div class="col-10 m-auto p-0">
             <table class="table table-bordered w-100 shadow m-auto align-middle text-center">
                 <thead>
-                    <tr>
+                    <tr class="text-capitalize">
                         <th>cnic</th>
                         <th>silsila</th>
                         <th>gahrana</th>
@@ -53,6 +126,82 @@
 </body>
 <script>
     $(document).ready(function() {
+        function Preview() {
+            $("#preImgs").html('');
+            $.ajax({
+                url: "",
+                type: "post",
+                data: new FormData($("#pimgForm")[0]),
+                processData: false,
+                contentType: false,
+                success: function(pre) {
+                    console.log(pre);
+                    if (pre.status === 200) {
+                        $("#preImgs").html('');
+                        let imgs = '';
+                        for (let i = 0; i < pre.imgs.length; i++) {
+                            console.log(pre.imgs[i])
+                            imgs +=
+                                `<img src='${pre.imgs[i]}?${new Date().getTime()}' class='w-100 d-block h-100' />`;
+                        }
+                        $("#preImgs").html(imgs);
+                        // setInterval(() => {
+                        //     $.ajax({
+                        //         type: "post",
+                        //         url: "",
+                        //         data: {
+                        //             imgs: pre.imgs,
+                        //             deleted: 'true',
+                        //             _token: $("[name='_token']").val()
+                        //         },
+                        //         success: function(resp) {
+                        //             console.log(pre.imgs.length +
+                        //                 ' Images Deleted!');
+                        //         },
+                        //     });
+                        // }, 2000);
+                    }
+                }
+            });
+
+        }
+        $("#pImg").change(function() {
+            let x = $("#x").val();
+            let y = $("#y").val();
+            let height = $("#height").val();
+            let img = $("#pImg").val();
+            if (x !== "" && y !== "" && height !== "" && img !== "") {
+                Preview();
+            }
+        });
+        $("#x").keyup(function() {
+            let x = $("#x").val();
+            let y = $("#y").val();
+            let height = $("#height").val();
+            let img = $("#pImg").val();
+            if (x !== "" && y !== "" && height !== "" && img !== "") {
+                Preview();
+            }
+        });
+        $("#y").keyup(function() {
+            let x = $("#x").val();
+            let y = $("#y").val();
+            let height = $("#height").val();
+            let img = $("#pImg").val();
+            if (x !== "" && y !== "" && height !== "" && img !== "") {
+                Preview();
+                console.log('kl');
+            }
+        });
+        $("#height").keyup(function() {
+            let x = $("#x").val();
+            let y = $("#y").val();
+            let height = $("#height").val();
+            let img = $("#pImg").val();
+            if (x !== "" && y !== "" && height !== "" && img !== "") {
+                Preview();
+            }
+        });
         $("#imageForm").on("submit", function(e) {
             var formdata = new FormData(this);
             e.preventDefault();
@@ -62,9 +211,7 @@
                 contentType: false,
                 processData: false,
                 beforeSend: function() {
-                    $("#uploadBtn").html($("#uploadBtn").html() +
-                        `<span class="spinner-border spinner-border-sm ms-4" role="status" aria-hidden="true"></span>`
-                        );
+                    $("#uploadBtn").html('Uploading');
                 },
                 success: function(response) {
                     console.log(response);

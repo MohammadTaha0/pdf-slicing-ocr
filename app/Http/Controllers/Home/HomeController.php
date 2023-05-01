@@ -6,6 +6,9 @@ ini_set('max_execution_time', 300);
 
 // putenv("PATH=" . getenv('PATH') . ";C:\Program Files\Tesseract-OCR\"");
 use App\Http\Controllers\Controller;
+use App\Models\Constituencies;
+use App\Models\Districts;
+use App\Models\WardsData;
 use Illuminate\Http\Request;
 use thiagoalessio\TesseractOCR\TesseractOCR;
 use Intervention\Image\ImageManagerStatic as Image;
@@ -64,157 +67,157 @@ class HomeController extends Controller
         // print_r(array_filter($filter));
         // $_SESSION['']
 
-        $i = 1;
-        $filter = [];
-        $pdfPath = public_path('sample.pdf');
-        $command = 'pdfinfo ' . $pdfPath;
-        exec($command, $output);
-        print_r($output);
-        die();
-        $totalPages = str_replace('Pages: ', '', $output[7]);
-        $height = 0;
-        for ($cols = 1; $cols <= 18; $cols++) {
-            $sliceX = 491; // starting x position of slice
-            $sliceY = 163 + $height; // starting y position of slice
-            $sliceWidth = 159; // width of slice
-            $sliceHeight = 60; // height of slice
-            $command = 'pdftoppm -png ' . $pdfPath . ' cnic -f 8 -singlefile -x ' . $sliceX . ' -y ' . $sliceY . ' -W ' . $sliceWidth . ' -H ' . $sliceHeight;
-            exec($command);
-            $images = glob('cnic*.png');
-            foreach ($images as $image) {
-                $command = 'tesseract ' .  $image . ' stdout';
-                $output = [];
-                exec($command, $output);
-                $numericValues[] = implode(' ', $output);
-            }
-            foreach ($numericValues as $key => $value) {
-                if ($value > 0) { // replace true with meaningful condition
-                    if (strlen($value) === 15) {
-                        $filter[$value]['cnic'] = $value;
-                        $cnic = $value;
-                    } else {
-                        $cnic = "";
-                    }
-                }
-            }
-            $sliceX = 1100; // starting x position of slice
-            $sliceY = 163 + $height; // starting y position of slice
-            $sliceWidth = 53; // width of slice
-            $sliceHeight = 60; // height of slice
-            $command = 'pdftoppm -png ' . $pdfPath . ' gty1 -f 8 -singlefile -x ' . $sliceX . ' -y ' . $sliceY . ' -W ' . $sliceWidth . ' -H ' . $sliceHeight;
-            exec($command);
-            $images = glob('gty1*.png');
-            foreach ($images as $image) {
-                $command = 'tesseract ' .  $image . ' stdout';
-                $output = [];
-                exec($command, $output);
-                $numericValues[] = implode(' ', $output);
-            }
-            foreach ($numericValues as $key => $value) {
-                if ($value > 0) { // replace true with meaningful condition
-                    $filter[$cnic]['silsila'] = $value;
-                    $silsila = $value;
-                    $value = "";
-                }
-            }
-            $sliceX = 1020; // starting x position of slice
-            $sliceY = 163 + $height; // starting y position of slice
-            $sliceWidth = 60; // width of slice
-            $sliceHeight = 60; // height of slice
-            $command = 'pdftoppm -png ' . $pdfPath . ' gtys -f 8 -singlefile -x ' . $sliceX . ' -y ' . $sliceY . ' -W ' . $sliceWidth . ' -H ' . $sliceHeight;
-            exec($command);
-            $images = glob('gtys*.png');
-            foreach ($images as $image) {
-                $command = 'tesseract ' .  $image . ' stdout';
-                $output = [];
-                exec($command, $output);
-                $numericValues[] = implode(' ', $output);
-            }
-            foreach ($numericValues as $key => $value) {
-                if ($value > 0) { // replace true with meaningful condition
-                    $filter[$cnic]['ghrana'] = $value;
-                    $gharana = $value;
-                    $value = "";
-                }
-            }
-            $sliceX = 930; // starting x position of slice
-            $sliceY = 155 + $height; // starting y position of slice
-            $sliceWidth = 84; // width of slice
-            $sliceHeight = 35; // height of slice
-            $command = 'pdftoppm -png ' . $pdfPath . ' fname_' . $silsila . '_' . $gharana . ' -f 8 -singlefile -x ' . $sliceX . ' -y ' . $sliceY . ' -W ' . $sliceWidth . ' -H ' . $sliceHeight;
-            exec($command);
-            $images = glob('fname_' . $silsila . '_' . $gharana . '*.png');
-            foreach ($images as $image) {
-                $command = 'tesseract ' .  $image . ' stdout';
-                $output = [];
-                exec($command, $output);
-                $numericValues[] = implode(' ', $output);
-            }
-            foreach ($numericValues as $key => $value) {
-                if ($value > 0) { // replace true with meaningful condition
-                    $filter[$cnic]['fname'] = $image;
-                }
-            }
-            $sliceX = 745; // starting x position of slice
-            $sliceY = 155 + $height; // starting y position of slice
-            $sliceWidth = 104; // width of slice
-            $sliceHeight = 35; // height of slice
-            $command = 'pdftoppm -png ' . $pdfPath . ' fathername_' . $silsila . '_' . $gharana . ' -f 8 -singlefile -x ' . $sliceX . ' -y ' . $sliceY . ' -W ' . $sliceWidth . ' -H ' . $sliceHeight;
-            exec($command);
-            $images = glob('fathername_' . $silsila . '_' . $gharana . '*.png');
-            foreach ($images as $image) {
-                $command = 'tesseract ' .  $image . ' stdout';
-                $output = [];
-                exec($command, $output);
-                $numericValues[] = implode(' ', $output);
-            }
-            foreach ($numericValues as $key => $value) {
-                if ($value > 0) { // replace true with meaningful condition
-                    $filter[$cnic]['fathername'] = $image;
-                }
-            }
-            $sliceX = 443; // starting x position of slice
-            $sliceY = 163 + $height; // starting y position of slice
-            $sliceWidth = 45; // width of slice
-            $sliceHeight = 57; // height of slice
-            $command = 'pdftoppm -png ' . $pdfPath . ' age_' . $silsila . '_' . $gharana . ' -f 8 -singlefile -x ' . $sliceX . ' -y ' . $sliceY . ' -W ' . $sliceWidth . ' -H ' . $sliceHeight;
-            exec($command);
-            $images = glob('age_' . $silsila . '_' . $gharana . '*.png');
-            foreach ($images as $image) {
-                $command = 'tesseract ' .  $image . ' stdout';
-                $output = [];
-                exec($command, $output);
-                $numericValues[] = implode(' ', $output);
-            }
-            foreach ($numericValues as $key => $value) {
-                if ($value > 0) { // replace true with meaningful condition
-                    $filter[$cnic]['age'] = $image;
-                }
-            }
-            $sliceX = 45; // starting x position of slice
-            $sliceY = 163 + $height; // starting y position of slice
-            $sliceWidth = 390; // width of slice
-            $sliceHeight = 57; // height of slice
-            $command = 'pdftoppm -png ' . $pdfPath . ' address_' . $silsila . '_' . $gharana . ' -f 8 -singlefile -x ' . $sliceX . ' -y ' . $sliceY . ' -W ' . $sliceWidth . ' -H ' . $sliceHeight;
-            exec($command);
-            $images = glob('address_' . $silsila . '_' . $gharana . '*.png');
-            foreach ($images as $image) {
-                $command = 'tesseract ' .  $image . ' stdout';
-                $output = [];
-                exec($command, $output);
-                $numericValues[] = implode(' ', $output);
-            }
-            foreach ($numericValues as $key => $value) {
-                if ($value > 0) { // replace true with meaningful condition
-                    $filter[$cnic]['address'] = $image;
-                }
-            }
-            $height += 86;
-            $cnic = "";
-            $gharana = "";
-            $silsila = "";
-            $value = "";
-        }
+        // $i = 1;
+        // $filter = [];
+        // $pdfPath = public_path('sample.pdf');
+        // $command = 'pdfinfo ' . $pdfPath;
+        // exec($command, $output);
+        // print_r($output);
+        // die();
+        // $totalPages = str_replace('Pages: ', '', $output[7]);
+        // $height = 0;
+        // for ($cols = 1; $cols <= 18; $cols++) {
+        //     $sliceX = 491; // starting x position of slice
+        //     $sliceY = 163 + $height; // starting y position of slice
+        //     $sliceWidth = 159; // width of slice
+        //     $sliceHeight = 60; // height of slice
+        //     $command = 'pdftoppm -png ' . $pdfPath . ' cnic -f 8 -singlefile -x ' . $sliceX . ' -y ' . $sliceY . ' -W ' . $sliceWidth . ' -H ' . $sliceHeight;
+        //     exec($command);
+        //     $images = glob('cnic*.png');
+        //     foreach ($images as $image) {
+        //         $command = 'tesseract ' .  $image . ' stdout';
+        //         $output = [];
+        //         exec($command, $output);
+        //         $numericValues[] = implode(' ', $output);
+        //     }
+        //     foreach ($numericValues as $key => $value) {
+        //         if ($value > 0) { // replace true with meaningful condition
+        //             if (strlen($value) === 15) {
+        //                 $filter[$value]['cnic'] = $value;
+        //                 $cnic = $value;
+        //             } else {
+        //                 $cnic = "";
+        //             }
+        //         }
+        //     }
+        //     $sliceX = 1100; // starting x position of slice
+        //     $sliceY = 163 + $height; // starting y position of slice
+        //     $sliceWidth = 53; // width of slice
+        //     $sliceHeight = 60; // height of slice
+        //     $command = 'pdftoppm -png ' . $pdfPath . ' gty1 -f 8 -singlefile -x ' . $sliceX . ' -y ' . $sliceY . ' -W ' . $sliceWidth . ' -H ' . $sliceHeight;
+        //     exec($command);
+        //     $images = glob('gty1*.png');
+        //     foreach ($images as $image) {
+        //         $command = 'tesseract ' .  $image . ' stdout';
+        //         $output = [];
+        //         exec($command, $output);
+        //         $numericValues[] = implode(' ', $output);
+        //     }
+        //     foreach ($numericValues as $key => $value) {
+        //         if ($value > 0) { // replace true with meaningful condition
+        //             $filter[$cnic]['silsila'] = $value;
+        //             $silsila = $value;
+        //             $value = "";
+        //         }
+        //     }
+        //     $sliceX = 1020; // starting x position of slice
+        //     $sliceY = 163 + $height; // starting y position of slice
+        //     $sliceWidth = 60; // width of slice
+        //     $sliceHeight = 60; // height of slice
+        //     $command = 'pdftoppm -png ' . $pdfPath . ' gtys -f 8 -singlefile -x ' . $sliceX . ' -y ' . $sliceY . ' -W ' . $sliceWidth . ' -H ' . $sliceHeight;
+        //     exec($command);
+        //     $images = glob('gtys*.png');
+        //     foreach ($images as $image) {
+        //         $command = 'tesseract ' .  $image . ' stdout';
+        //         $output = [];
+        //         exec($command, $output);
+        //         $numericValues[] = implode(' ', $output);
+        //     }
+        //     foreach ($numericValues as $key => $value) {
+        //         if ($value > 0) { // replace true with meaningful condition
+        //             $filter[$cnic]['ghrana'] = $value;
+        //             $gharana = $value;
+        //             $value = "";
+        //         }
+        //     }
+        //     $sliceX = 930; // starting x position of slice
+        //     $sliceY = 155 + $height; // starting y position of slice
+        //     $sliceWidth = 84; // width of slice
+        //     $sliceHeight = 35; // height of slice
+        //     $command = 'pdftoppm -png ' . $pdfPath . ' fname_' . $silsila . '_' . $gharana . ' -f 8 -singlefile -x ' . $sliceX . ' -y ' . $sliceY . ' -W ' . $sliceWidth . ' -H ' . $sliceHeight;
+        //     exec($command);
+        //     $images = glob('fname_' . $silsila . '_' . $gharana . '*.png');
+        //     foreach ($images as $image) {
+        //         $command = 'tesseract ' .  $image . ' stdout';
+        //         $output = [];
+        //         exec($command, $output);
+        //         $numericValues[] = implode(' ', $output);
+        //     }
+        //     foreach ($numericValues as $key => $value) {
+        //         if ($value > 0) { // replace true with meaningful condition
+        //             $filter[$cnic]['fname'] = $image;
+        //         }
+        //     }
+        //     $sliceX = 745; // starting x position of slice
+        //     $sliceY = 155 + $height; // starting y position of slice
+        //     $sliceWidth = 104; // width of slice
+        //     $sliceHeight = 35; // height of slice
+        //     $command = 'pdftoppm -png ' . $pdfPath . ' fathername_' . $silsila . '_' . $gharana . ' -f 8 -singlefile -x ' . $sliceX . ' -y ' . $sliceY . ' -W ' . $sliceWidth . ' -H ' . $sliceHeight;
+        //     exec($command);
+        //     $images = glob('fathername_' . $silsila . '_' . $gharana . '*.png');
+        //     foreach ($images as $image) {
+        //         $command = 'tesseract ' .  $image . ' stdout';
+        //         $output = [];
+        //         exec($command, $output);
+        //         $numericValues[] = implode(' ', $output);
+        //     }
+        //     foreach ($numericValues as $key => $value) {
+        //         if ($value > 0) { // replace true with meaningful condition
+        //             $filter[$cnic]['fathername'] = $image;
+        //         }
+        //     }
+        //     $sliceX = 443; // starting x position of slice
+        //     $sliceY = 163 + $height; // starting y position of slice
+        //     $sliceWidth = 45; // width of slice
+        //     $sliceHeight = 57; // height of slice
+        //     $command = 'pdftoppm -png ' . $pdfPath . ' age_' . $silsila . '_' . $gharana . ' -f 8 -singlefile -x ' . $sliceX . ' -y ' . $sliceY . ' -W ' . $sliceWidth . ' -H ' . $sliceHeight;
+        //     exec($command);
+        //     $images = glob('age_' . $silsila . '_' . $gharana . '*.png');
+        //     foreach ($images as $image) {
+        //         $command = 'tesseract ' .  $image . ' stdout';
+        //         $output = [];
+        //         exec($command, $output);
+        //         $numericValues[] = implode(' ', $output);
+        //     }
+        //     foreach ($numericValues as $key => $value) {
+        //         if ($value > 0) { // replace true with meaningful condition
+        //             $filter[$cnic]['age'] = $image;
+        //         }
+        //     }
+        //     $sliceX = 45; // starting x position of slice
+        //     $sliceY = 163 + $height; // starting y position of slice
+        //     $sliceWidth = 390; // width of slice
+        //     $sliceHeight = 57; // height of slice
+        //     $command = 'pdftoppm -png ' . $pdfPath . ' address_' . $silsila . '_' . $gharana . ' -f 8 -singlefile -x ' . $sliceX . ' -y ' . $sliceY . ' -W ' . $sliceWidth . ' -H ' . $sliceHeight;
+        //     exec($command);
+        //     $images = glob('address_' . $silsila . '_' . $gharana . '*.png');
+        //     foreach ($images as $image) {
+        //         $command = 'tesseract ' .  $image . ' stdout';
+        //         $output = [];
+        //         exec($command, $output);
+        //         $numericValues[] = implode(' ', $output);
+        //     }
+        //     foreach ($numericValues as $key => $value) {
+        //         if ($value > 0) { // replace true with meaningful condition
+        //             $filter[$cnic]['address'] = $image;
+        //         }
+        //     }
+        //     $height += 86;
+        //     $cnic = "";
+        //     $gharana = "";
+        //     $silsila = "";
+        //     $value = "";
+        // }
 
         // print_r($filter); // print filtered numeric values for debugging
 
@@ -238,9 +241,9 @@ class HomeController extends Controller
         //     }
         // }
 
-        echo "<body style='background: white;'><img src='" . asset('fname_70_30.png') . "' style='mix-blend-mode: multiply;' ></body>";
-        echo "<pre>";
-        print_r(array_filter($filter));
+        // echo "<body style='background: white;'><img src='" . asset('fname_70_30.png') . "' style='mix-blend-mode: multiply;' ></body>";
+        // echo "<pre>";
+        // print_r(array_filter($filter));
         // foreach ($filter as $key => $value) {
 
         // }
@@ -249,170 +252,8 @@ class HomeController extends Controller
     }
     public function ocr()
     {
-        // Set the path to the image file
-        // $imagePath = public_path('image.jpg');
-
-        // // Set the language for OCR to use
-        // $language = 'eng';
-
-        // // Extract tables from the image
-        // $tables = OCR::table_extraction($imagePath, $language);
-
-        // // Print the extracted tables
-        // print_r($tables);
-        // die();
-        putenv('TESSDATA_PREFIX=' . 'C:\Program Files\Tesseract-OCR\tessdata');
-        $imagePath = 'image.jpg';
-        $rowH = 0;
-        // $imagePath = public_path('images/table.png');
-
-        // $image = Image::make($imagePath);
-
-        // // Convert to grayscale
-        // $image->greyscale();
-
-        // // Apply adaptive threshold
-        // $image->contrast(-2);
-        // $image->brightness(-10);
-        // $image->contrast(-2);
-
-        // // Apply median filter
-        // $image->blur(0);
-
-        // // Save the preprocessed image
-        // $image->save(public_path('preprocessed.jpg'));
-        // $imagePath = 'preprocessed.jpg';
-        // die();
-
-
-        // for ($row = 1; $row <= 16; $row++) {
-        //     // echo $row;
-        //     #cnic
-        //     $width = 276;
-        //     $height = 90;
-        //     $cnic = '';
-        //     $slice = imagecreatetruecolor($width, $height);
-        //     $x = 1000;
-        //     $y = 170 + $rowH;
-        //     $source = imagecreatefromjpeg($imagePath);
-        //     imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
-        //     $slicePath = 'cnic-' . $row . '.jpg';
-        //     imagejpeg($slice, $slicePath);
-        //     try {
-
-        //         $sliceText = (new TesseractOCR($slicePath))
-        //             // ->psm(6) // set page segmentation mode
-        //             ->run();
-        //         $urduText = $sliceText;
-        //         $cnic .= $urduText;
-        //         // unlink($slicePath);
-        //     } catch (\Exception $e) {
-        //         $e->getMessage();
-        //     }
-        //     // print_r($cnic);
-        //     // die();
-        //     if (!File::exists('imgs/' . $cnic)) {
-        //         File::makeDirectory('imgs/' . $cnic);
-        //     }
-        //     #silsila
-        //     $width = 80;
-        //     $height = 90;
-        //     $silsila = '';
-        //     $slice = imagecreatetruecolor($width, $height);
-
-        //     $x = 2100;
-        //     $y = 180 + $rowH;
-        //     $source = imagecreatefromjpeg($imagePath);
-        //     imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
-        //     $slicePath = 'silsila-' . $cnic . '.jpg';
-        //     imagejpeg($slice, $slicePath);
-        //     try {
-        //         $sliceText = (new TesseractOCR($slicePath))
-        //             // ->psm(6) // set page segmentation mode
-        //             ->run();
-        //         $urduText = $sliceText;
-        //         $silsila .= $urduText;
-        //         unlink($slicePath);
-        //     } catch (\Exception $e) {
-        //         $e->getMessage();
-        //     }
-
-        //     #gharana
-        //     $width = 90;
-        //     $height = 90;
-        //     $gharana = '';
-        //     $slice = imagecreatetruecolor($width, $height);
-
-        //     $x = 1960;
-        //     $y = 180 + $rowH;
-        //     $source = imagecreatefromjpeg($imagePath);
-        //     imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
-        //     $gharana = 'imgs/' . $cnic . '/gharana.jpg';
-        //     imagejpeg($slice, $gharana);
-        //     try {
-        //         $sliceText = (new TesseractOCR($gharana))
-        //             // ->psm(6) // set page segmentation mode
-        //             ->run();
-        //         $urduText = $sliceText;
-        //         $gharana .= $urduText;
-        //         unlink($gharana);
-        //     } catch (\Exception $e) {
-        //         $e->getMessage();
-        //     }
-
-        //     #name
-        //     $width = 150;
-        //     $height = 80;
-        //     $name = '';
-        //     $slice = imagecreatetruecolor($width, $height);
-
-        //     $x = 1780;
-        //     $y = 140 + $rowH;
-        //     $source = imagecreatefromjpeg($imagePath);
-        //     imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
-        //     $name = 'imgs/' . $cnic . '/name.jpg';
-        //     imagejpeg($slice, $name);
-
-        //     // address
-        //     $width = 740;
-        //     $height = 90;
-        //     $slice = imagecreatetruecolor($width, $height);
-        //     $x = 160;
-        //     $y = 180 + $rowH;
-        //     $source = imagecreatefromjpeg($imagePath);
-        //     imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
-        //     $address = 'imgs/' . $cnic . '/address.jpg';
-        //     imagejpeg($slice, $address);
-
-
-        //     $data[$cnic] = [
-        //         'cnic' => $cnic,
-        //         'silsila' => $silsila,
-        //         'gharana' => $gharana,
-        //         'name' => $name,
-        //         'address' => $address,
-        //         'nameIsImg' => true,
-        //         'gharanaIsImg' => true,
-        //         'addressIsImg' => true,
-        //     ];
-        //     if ($row < 5) {
-        //         $rowH += 160;
-        //     } elseif ($row === 5) {
-        //         $rowH += 145;
-        //     } elseif ($row > 8) {
-        //         $rowH += 150;
-        //     }
-        // }
-        // session(['data' => $data]);
-        // $data = Session::get('data');
-        // echo '<br><br><br><br><br><pre>';
-        // print_r($data);
-        return view('Home.Index');
-
-        // header('Content-Type: text/html; charset=Windows-1256');
-        // echo '<html><head><style>@font-face {font-family: "Nastaliq";src: url("Nastaliq.ttf") format("truetype");}body {font-family: "Nastaliq"; background-color: black; color: white;}</style></head><body>
-        // <pre>' . print_r($data) . '</pre>
-        // </body></html>';
+        $ucs = Districts::join('constituencies as c', 'c.district', '=', 'districts.id')->get(['c.id', 'UCName', 'districts.districtName']);
+        return view('Home.Index')->with(compact('ucs'));
     }
     public function op()
     {
@@ -443,18 +284,63 @@ class HomeController extends Controller
     }
     public function ocr_edit(Request $request)
     {
+        if ($request->deleted === 'true') {
+            for ($i = 0; $i < $request->imgs; $i++) {
+                unlink($request->imgs[$i]);
+            }
+        }
+        if ($request->view === 'true') {
+            putenv('TESSDATA_PREFIX=' . 'C:\Program Files\Tesseract-OCR\tessdata');
+            $imagePath = $request->file('image');
+            $rowH = 0;
+            for ($row = 1; $row <= $request->upto; $row++) {
+                #cnic
+                // $width = 276;
+                // $height = 90;
+                $width = 150;
+                $height = 80;
+                $cnic = '';
+                $slice = imagecreatetruecolor($width, $height);
+                $x = $request->x;
+                $y = $request->y + $rowH;
+                $source = imagecreatefromjpeg($imagePath);
+                imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
+                $cnic = 'pcnic-' . $row . '.jpg';
+                imagejpeg($slice, $cnic);
+                // try {
+
+                //     $sliceText = (new TesseractOCR($slicePath))
+                //         // ->psm(6) // set page segmentation mode
+                //         ->run();
+                //     $urduText = $sliceText;
+                //     $cnic .= $urduText;
+                //     // unlink($slicePath);
+                // } catch (\Exception $e) {
+                //     return $e->getMessage();
+                // }
+                $data[] = $cnic;
+                // if ($row < 5) {
+                    $rowH += $request->height;
+                // } elseif ($row === 5) {
+                //     $rowH += $request->height - 15;
+                // } elseif ($row > 8) {
+                //     $rowH += $request->height - 10;
+                // }
+            }
+            return response()->json(['status' => 200, 'imgs' => $data]);
+        }
         if ($request->get === 'true') {
             putenv('TESSDATA_PREFIX=' . 'C:\Program Files\Tesseract-OCR\tessdata');
             $imagePath = $request->file('image');
             $rowH = 0;
-            for ($row = 1; $row <= 16; $row++) {
+            for ($row = 1; $row <= $request->upto; $row++) {
                 #cnic
                 $width = 276;
                 $height = 90;
                 $cnic = '';
                 $slice = imagecreatetruecolor($width, $height);
                 $x = 1000;
-                $y = 170 + $rowH;
+                $y = $request->y + $rowH;
                 $source = imagecreatefromjpeg($imagePath);
                 imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
                 $slicePath = 'cnic-' . $row . '.jpg';
@@ -482,7 +368,7 @@ class HomeController extends Controller
                 $slice = imagecreatetruecolor($width, $height);
 
                 $x = 2100;
-                $y = 180 + $rowH;
+                $y = $request->y + 10 + $rowH;
                 $source = imagecreatefromjpeg($imagePath);
                 imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
                 $slicePath = 'silsila-' . $cnic . '.jpg';
@@ -505,7 +391,7 @@ class HomeController extends Controller
                 $slice = imagecreatetruecolor($width, $height);
 
                 $x = 1960;
-                $y = 180 + $rowH;
+                $y = $request->y + 10 + $rowH;
                 $source = imagecreatefromjpeg($imagePath);
                 imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
                 $gharana = 'imgs/' . $cnic . '/gharana.jpg';
@@ -528,7 +414,7 @@ class HomeController extends Controller
                 $slice = imagecreatetruecolor($width, $height);
 
                 $x = 1780;
-                $y = 140 + $rowH;
+                $y = ($request->y - 30) + $rowH;
                 $source = imagecreatefromjpeg($imagePath);
                 imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
                 $name = 'imgs/' . $cnic . '/name.jpg';
@@ -539,7 +425,7 @@ class HomeController extends Controller
                 $height = 90;
                 $slice = imagecreatetruecolor($width, $height);
                 $x = 160;
-                $y = 180 + $rowH;
+                $y = $request->y + 10 + $rowH;
                 $source = imagecreatefromjpeg($imagePath);
                 imagecopy($slice, $source, 0, 0, $x, $y, $width, $height);
                 $address = 'imgs/' . $cnic . '/address.jpg';
@@ -557,11 +443,11 @@ class HomeController extends Controller
                     'addressIsImg' => true,
                 ];
                 if ($row < 5) {
-                    $rowH += 160;
+                    $rowH += $request->height;
                 } elseif ($row === 5) {
-                    $rowH += 145;
+                    $rowH += $request->height - 15;
                 } elseif ($row > 8) {
-                    $rowH += 150;
+                    $rowH += $request->height - 10;
                 }
             }
             session(['data' => $data]);
